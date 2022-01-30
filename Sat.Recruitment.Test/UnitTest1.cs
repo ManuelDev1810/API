@@ -1,10 +1,7 @@
-using System;
-using System.Dynamic;
-
-using Microsoft.AspNetCore.Mvc;
-
 using Sat.Recruitment.Api.Controllers;
-
+using Sat.Recruitment.Core.Constans;
+using Sat.Recruitment.Core.Interfaces;
+using Sat.Recruitment.Core.Models;
 using Xunit;
 
 namespace Sat.Recruitment.Test
@@ -12,28 +9,54 @@ namespace Sat.Recruitment.Test
     [CollectionDefinition("Tests", DisableParallelization = true)]
     public class UnitTest1
     {
+        private readonly IUserRepository _userRepository;
+
+        public UnitTest1(IUserRepository userRepository) => _userRepository = userRepository;
+
+
         [Fact]
         public void Test1()
         {
-            var userController = new UsersController();
+             
+            var userController = new UserController(_userRepository);
 
-            var result = userController.CreateUser("Mike", "mike@gmail.com", "Av. Juan G", "+349 1122354215", "Normal", "124").Result;
+            var user = new User
+            {
+                Name = "Mike",
+                Email = "mike@gmail.com",
+                Address = "Av. Juan G",
+                Phone = "+349 1122354215",
+                UserType = "Normal",
+                Money = 124
+            };
+
+            var result = userController.CreateUser(user);
 
 
-            Assert.Equal(true, result.IsSuccess);
-            Assert.Equal("User Created", result.Errors);
+            Assert.True(result.IsSuccess);
+            Assert.Equal(UserMessages.USER_CREATED, result.Message);
         }
 
         [Fact]
         public void Test2()
         {
-            var userController = new UsersController();
+            var userController = new UserController(_userRepository);
 
-            var result = userController.CreateUser("Agustina", "Agustina@gmail.com", "Av. Juan G", "+349 1122354215", "Normal", "124").Result;
+            var user = new User
+            {
+                Name = "Agustina",
+                Email = "Agustina@gmail.com",
+                Address = "Av. Juan G",
+                Phone = "+349 1122354215",
+                UserType = "Normal",
+                Money = 124
+            };
+
+            var result = userController.CreateUser(user);
 
 
-            Assert.Equal(false, result.IsSuccess);
-            Assert.Equal("The user is duplicated", result.Errors);
+            Assert.False(result.IsSuccess);
+            Assert.Equal(UserMessages.USER_DUPLICATED, result.Message);
         }
     }
 }
